@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 from tdasampling import sampling_algorithm
-from search_space import _splitBoxAlongDimension
+from tdasampling.search_space import _splitBoxAlongDimension
 from multiprocessing import Process,Manager
 import math,sys,os
 import numpy as np
@@ -27,7 +27,7 @@ parser.add_option("--hosts",dest="hosts",help="Comma separated list of ssh host 
 parser.add_option("--skipint",dest="skip_interval",type=float,help="Step size for increasing permissiveness of point addition heuristics. Defaults recommended.")
 parser.add_option("--avglength",dest="rolling_average_length",type=int,help="Number of points to remember for point addition heuristics. Defaults recommended.")
 parser.add_option("--allowedskips",dest="number_of_allowed_skips",type=int,help="Number of remembered points which are allowed to be skips before increasing permissiveness. Defaults recommended.")
-
+parser.add_option("--outpath",dest="output_path",help="File name of output file if you do not want to use the default. Can be in any directory.")
 
 (parameters,args) = parser.parse_args()
 parameters = parameters.__dict__
@@ -171,7 +171,10 @@ if density_parameter_mod-2 < 0:
 else: 
 	density_parameter_name = str(density_parameter_start)+"e+"+str(density_parameter_mod-2)
 sample_name = density_parameter_name + "_sample.txt"
-output_path = os.path.join(template_stem,sample_name)
+if parameters["output_path"] is not None: 
+	output_path = os.path.abspath(parameters["output_path"])
+else: 
+	output_path = os.path.join(template_stem,sample_name)
 np.savetxt(output_path,p_out,delimiter=",")
 
 
