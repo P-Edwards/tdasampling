@@ -1,0 +1,176 @@
+\documentclass[11pt]{article}
+\include{macros}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb,amsfonts,amscd}
+\usepackage{graphicx}
+\usepackage{minted} 
+
+%=================================================
+
+
+\textwidth 6.5in
+\textheight 8.75in
+\oddsidemargin 0in
+%\evensidemargin 0in
+\topmargin -0.5in
+
+%\usepackage[notref,not]{showkeys}
+
+%=================================================
+
+
+
+
+
+%=================================================
+% new commands, math operators
+%=================================================
+
+\newcommand{\sA}{{\mathcal A}}
+\newcommand{\sB}{{\mathcal B}}
+\newcommand{\sC}{{\mathcal C}}
+\newcommand{\sE}{{\mathcal E}}
+\newcommand{\sI}{{\mathcal I}}
+\newcommand{\sJ}{{\mathcal J}}
+\newcommand{\sL}{{\mathcal L}}
+\newcommand{\Var}{{\mathcal V}}
+\newcommand{\sZ}{{\mathcal Z}}
+\newcommand{\sU}{{\mathcal U}}
+\newcommand{\sW}{{\mathcal W}}
+
+\newcommand\pn[1]{{\bP}^{#1}}
+\newcommand\red[1]{X^{[#1]}_{(1,\dots, 1)}}
+
+\newcommand\bC{{\mathbb C}}
+\newcommand\bN{{\mathbb N}}
+\newcommand\bP{{\mathbb P}}
+\newcommand\bQ{{\mathbb Q}}
+\newcommand\bR{{\mathbb R}}
+\newcommand\bZ{{\mathbb Z}}
+
+\newcommand\suchthat{~|~}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\trace}{\rm trace}
+\DeclareMathOperator*{\rank}{\rm rank}
+
+
+
+%===============================================
+%          Title
+%===============================================
+
+
+\begin{document}
+\title{\texttt{tdasampling} User's Manual}
+
+\author{
+Parker Edwards
+}
+
+\maketitle
+\tableofcontents
+
+This manual is for Linux distributions, which is the only OS for which \texttt{tdasampling} has been tested.
+
+\section{Installation} 
+Installation is via pip. In this example, the current working directory is a 
+virtual environment. It will install the scripts to the directory's bin folder rather than into the global bin folder.
+
+\begin{minted}{shell} 
+$ pip install tdasampling
+\end{minted} 
+
+The pip command will install the Python dependencies automatically.
+
+\section{Installing requirements}
+\begin{minted}{shell} 
+$ /bin/bash
+\end{minted} 
+\subsection{\texttt{libspatialindex} and \texttt{rtree}} 
+
+\subsubsection{Libspatialindex}
+If you have root access to the machine you're using, you can follow the standard installation instructions. First you need to install libspatialindex, with installation instructions at \url{https://libspatialindex.github.io/install.html}. 
+
+So, for instance, having changed your working directory to wherever you want to place the source files before installation: 
+\begin{minted}{shell} 
+$ curl http://download.osgeo.org/libspatialindex/spatialindex-src-1.8.5.tar.gz | tar xvz
+$ cd spatialindex-src-1.8.5/
+$ cmake .
+$ make 
+$ sudo make install
+\end{minted} 
+
+If you don't have root access to the installation machine, you'll want to install libspatialindex into a non-standard location. You do not need to place the \texttt{libspatial} source files in the same directory.
+
+\begin{minted}{shell} 
+$ curl http://download.osgeo.org/libspatialindex/spatialindex-src-1.8.5.tar.gz | tar xvz
+$ cd spatialindex-src-1.8.5/
+$ cmake -DCMAKE_INSTALL_PREFIX=/home/parker/test_dir/local .
+$ make 
+$ make install
+\end{minted} 
+
+\subsubsection{Adjusting rtree if libspatialindex is installed without root access}
+The \texttt{Rtree} Python package provides a Python interface over \texttt{libspatialindex} using Ctypes. If you have installed the \texttt{libspatialindex} library non-globally (without root access), then it has a hard time locating the library files. The \texttt{Rtree} package provides an environment variable you can export in your shell to fix this, but you have to export it every time you want to use \texttt{tdasampling}. An example: 
+
+\begin{minted}{shell} 
+$ export SPATIALINDEX_C_LIBRARY="/home/parker/test_dir/local/lib/
+libspatialindex_c.so.4"
+\end{minted} 
+
+As an alternative, you can just hard code the non-standard location of your libspatialindex files via the following command. If you change the location of libspatial, you'll need to update it again. The general form is: 
+
+\begin{minted}{shell} 
+$ sed -i "s/find_library('libspatialindex_c')/'\/a\/path\/to\/
+libspatialindex_c\.so\.4'/g" /a/path/to/your/rtree/source/core.py
+\end{minted} 
+
+The escape characters are unfortunately necessary from the command line. A specific example is:
+
+\begin{minted}{shell} 
+$ sed -i "s/find_library('spatialindex_c')/'\/home\/parker\/test_dir\/
+local\/lib\/libspatialindex_c.so.4'/g" \
+/home/parker/test_dir/lib/python2.7/site-packages/rtree/core.py
+\end{minted} 
+
+If you make this adjustment, you won't have to worry about exporting environmental variables every time you want to use \texttt{rtree}.
+
+\subsection{MPI} 
+Follow the installation instructions for MPI at \url{http://www.mpich.org/downloads/} or another favorite MPI implementation. 
+
+\subsection{Bertini} 
+Bertini offers both binary and source downloads at \url{https://bertini.nd.edu/download.html}. If you were using a 64-bit Linux machine, you could download and unpack the binaries using: 
+
+\begin{minted}{shell} 
+$ curl https://bertini.nd.edu/BertiniLinux64_v1.5.1.tar.gz | tar xvz
+\end{minted} 
+
+Optionally, you can also add the binary folder to your PATH by modifying \textasciitilde /.bashrc (replace \textasciitilde /.bashrc with the appropriate file for your system). You can do the same for mpiexec. 
+
+
+\section{Quick start tutorial} 
+The quick start will be sampling a quartic variety in 3 variables and 1 equation:
+
+\[
+4x^4+7y^4+3z^4-3-8x^3+2x^2y-4x^2-8xy^2-5xy+8x-6y^3+8y^2+4y = 0
+\]
+
+
+
+
+\section{Advanced settings}
+
+\subsection{Parallelism}
+
+
+
+
+
+
+
+
+
+\end{document}
+

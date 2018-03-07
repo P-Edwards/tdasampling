@@ -11,7 +11,7 @@ External requirements
 2. `Libspatialindex <https://libspatialindex.github.io/>`__ (A
    requirement of the Python package
    `Rtree <https://pypi.python.org/pypi/Rtree/>`__)
-3. An mpirun executable, like the one you can compile from source
+3. An mpiexec executable, like the one you can compile from source
    `here <https://www.open-mpi.org/software/ompi/v3.0/>`__
 
 Description
@@ -30,7 +30,7 @@ The package installs two command line scripts:
 See the included tutorial for detailed information about all the
 different options.
 
-Version 1.0.0
+Version 1.0.2
 -------------
 
 Basic usage for tdasampling

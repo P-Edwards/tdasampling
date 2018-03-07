@@ -18,7 +18,7 @@ parser.add_option("--homparallel",type="int",dest="number_of_processors_for_bert
 parser.add_option("-p","--parameters",action="store_true",dest="parameter_file",default=False,help="Set this flag if you want to use parameters file. The only required argument when this flag is present is polynomial_system_directory.")
 parser.add_option("--mpiexecutable",dest="mpi_executable_location",help="Use this option to specify a path to mpiexec if it is not in your PATH by defualt.")
 parser.add_option("--bertini",dest="bertini_executable_location",help="Use this option to specify a path to bertini if it is not in your PATH by defualt.")
-parser.add_option("--errorlimit",dest="rounding_precision",type=float,help="Specify the maximum distance of points returned by homotopy continuation from the variety.")
+parser.add_option("--errorlimit",dest="rounding_precision",type=float,default=1e-7,help="Specify the maximum distance of points returned by homotopy continuation from the variety.")
 parser.add_option("--output",dest="output_file_name",help="Specify non-standard output file name.")
 parser.add_option("--dimensionality",dest="dimensionality",type="int",help="Number of variables in polynomial system. Setting this option will check to make sure you have provided the right number of bounds.")
 parser.add_option("--previous",dest="previous_points",help="Path to a previous point sample to use as smaller search space. This option must be accompanied by --prevdensity.")
@@ -28,6 +28,7 @@ parser.add_option("--skipint",dest="skip_interval",type=float,help="Step size fo
 parser.add_option("--avglength",dest="rolling_average_length",type=int,help="Number of points to remember for point addition heuristics. Defaults recommended.")
 parser.add_option("--allowedskips",dest="number_of_allowed_skips",type=int,help="Number of remembered points which are allowed to be skips before increasing permissiveness. Defaults recommended.")
 parser.add_option("--outpath",dest="output_path",help="File name of output file if you do not want to use the default. Can be in any directory.")
+parser.add_option("--varindices",dest="variable_indices",help="Comma separated list of indices of minimizer variables in minimizer file.")
 
 (parameters,args) = parser.parse_args()
 parameters = parameters.__dict__
@@ -51,7 +52,7 @@ else:
 	if len(args) != 4: 
 		raise RuntimeError("Incorrect number of arguments.")
 	parameters["bounds"] = [float(entry) for entry in args[0].split(",")]
-	if "dimensionality" in parameters: 
+	if parameters["dimensionality"] is not None: 
 		if len(parameters["bounds"])/2 != parameters["dimensionality"]: 
 			raise RuntimeError("Dimensionality and number of bounds do not match.")
 	parameters["density_parameter"] = float(args[1])
@@ -60,29 +61,26 @@ else:
 
 
 # Set up basic algorithm parameters
-if "bounds" not in parameters: 
+if parameters["bounds"] is None: 
 	raise RuntimeError("A bounding box must be specified.")
-if "density_parameter" not in parameters: 
+if parameters["density_parameter"] is None: 
 	raise RuntimeError("A density parameter must be specified.")
-if "number_of_functions" not in parameters: 
+if parameters["number_of_functions"] is None:
 	raise RuntimeError("The number of functions in the polynomial system must be specified.")
 overall_bounds = parameters["bounds"]
 overall_bounds = [float(entry) for entry in overall_bounds]
 dimensionality = len(overall_bounds)/2
 density_parameter = float(parameters["density_parameter"])
 number_of_functions = parameters["number_of_functions"]
-if "variable_indices" not in parameters: 
+if parameters["variable_indices"] is not None:
+	variables_to_check = [int(variable) for variable in str(parameters["variable_indices"]).split(",")]
+else: 
 	variables_to_check = []
-else: 
-	variables_to_check = parameters["variable_indices"]
-if "rounding_precision" not in parameters: 
-	rounding_precision = 1e-7
-else: 
-	rounding_precision = parameters["rounding_precision"]
-if "previous_points" not in parameters: 
+rounding_precision = parameters["rounding_precision"]
+if parameters["previous_points"] is None: 
 	previous_run_data = False
 else:
-	if "old_density" not in parameters: 
+	if parameters["old_density"] is not None: 
 		print "No previous density provided. Running without previous sample data."
 		previous_run_data = False
 	else: 
@@ -91,24 +89,21 @@ else:
 		previous_run_data["density"] = float(parameters["old_density"])
 
 # Set up parallelization options
-if "number_of_parallel_instances" not in parameters: 
-	number_of_instances = 1
-else: 
-	number_of_instances = parameters["number_of_parallel_instances"]
+number_of_instances = parameters["number_of_parallel_instances"]
 computation_options = dict()
-if "mpi_executable_location" in parameters: 
+if parameters["mpi_executable_location"] is not None: 
 	computation_options["mpi_executable_location"] = parameters["mpi_executable_location"]
-if "bertini_executable_location" in parameters: 
+if parameters["bertini_executable_location"] is not None: 
 	computation_options["bertini_executable_location"] = parameters["bertini_executable_location"]
-if "number_of_processors_for_bertini" in parameters: 
+if parameters["number_of_processors_for_bertini"] is not None: 
 	computation_options["number_of_processors_for_bertini"] = parameters["number_of_processors_for_bertini"]
-if "hosts" in parameters: 
+if parameters["hosts"] is not None: 
 	computation_options["hosts"] = parameters["hosts"]
-if "skip_interval" in parameters: 
+if parameters["skip_interval"] is not None: 
 	computation_options["skip_interval"] = parameters["skip_interval"]
-if "rolling_average_length" in parameters: 
+if parameters["rolling_average_length"] is not None: 
 	computation_options["rolling_average_length"] = parameters["rolling_average_length"]
-if "number_of_allowed_skips" in parameters: 
+if parameters["number_of_allowed_skips"] is not None:
 	computation_options["number_of_allowed_skips"] = parameters["number_of_allowed_skips"]
 
 # Splits the overall bounding box for the problem into the specified

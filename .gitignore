@@ -4,3 +4,6 @@ dist/*
 build
 build/*
 *.egg-info
+manual/*.aux
+manual/*[^.tex]
+*.aux

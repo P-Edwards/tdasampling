@@ -1,0 +1,116 @@
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{amsfonts}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{wrapfig} 
+\usepackage{xcolor} 
+\usepackage{stmaryrd}
+\usepackage{tipa}
+\usepackage{float}
+\usepackage{bbm} 
+\usepackage{tikz}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{mathtools}
+\usepackage{afterpage}
+\usepackage{pdflscape}
+\usepackage{capt-of}
+\usepackage{epstopdf}
+\usepackage{setspace}
+\usepackage{changepage}
+\usepackage{tabularx}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+\usepackage{tikz-cd}
+% Let top 85% of a page contain a figure
+\renewcommand{\topfraction}{0.85}
+
+% Default amount of minimum text on page (Set to 10%)
+\renewcommand{\textfraction}{0.1}
+
+% Only place figures by themselves if they take up more than 75% of the page
+\renewcommand{\floatpagefraction}{0.75}
+
+% Basic math operators that are probably the most universal to 
+% all documents
+\newcommand{\mz}{\mathbb{Z}}
+\newcommand{\mr}{\mathbb{R}}
+\newcommand{\mn}{\mathbb{N}}
+\newcommand{\mq}{\mathbb{Q}}
+\newcommand{\mc}{\mathbb{C}}
+\newcommand{\del}{\partial}
+\newcommand{\twid}{{\raise.17ex\hbox{$\scriptstyle\sim$}}}
+\DeclareMathOperator{\im}{Im}
+\DeclareMathOperator{\ext}{Ext}
+\DeclareMathOperator{\Hom}{Hom}
+\DeclareMathOperator{\coker}{coker}
+\newcommand{\id}{\mathbbm{1}}
+\newcommand{\si}{\mathcal{I}}
+
+% Homological algebra 
+\newcommand{\ilim}{\varprojlim}
+\newcommand{\limone}{\varprojlim^1\nolimits}
+\newcommand{\dlim}{\varinjlim}
+\newcommand{\mzp}{\mz_{p^\infty}}  % The limit of Z/p -> Z/p^2 -> ...
+
+% Covering spaces
+\newcommand{\xtil}{\tilde{X}}
+\newcommand{\lxtil}{\tilde{x}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\btil}{\tilde{b}}
+\newcommand{\ltil}{\tilde{\ell}}
+
+% Category theory 
+\newcommand{\mcalc}{\mathcal{C}}
+\newcommand{\cop}{\mathcal{C}^{\text{op}}}
+\newcommand{\bset}{\textbf{Set }}
+\newcommand{\bpos}{\textbf{Pos }}
+\newcommand{\crel}{\textbf{CRel }}
+\newcommand{\lbrac}{\llbracket}
+\newcommand{\rbrac}{\rrbracket}
+\newcommand{\pfin}{\mathbf{P_{fin}}}
+\newcommand{\upv}{\Lambda}
+\newcommand{\app}{\text{App}}
+\newcommand{\alar}[1]{\xrightarrow{\alpha_{#1}}}
+\newcommand{\arr}[1]{\xrightarrow{#1}}
+\newcommand{\al}[1]{\xleftarrow{#1}}
+\newcommand{\all}[1]{\xleftarrow{\alpha_{#1}}}
+
+
+% Machine Learning
+\newcommand{\xbold}{\mathbf{x}}
+\newcommand{\xibold}{\mathbf{x}_i}
+\newcommand{\ybold}{\mathbf{y}}
+\newcommand{\mubold}{\mathbf{\mu}}
+\newcommand{\xtrans}{\xbold^{\mathbf{T}}}
+\newcommand{\wbold}{\mathbf{w}}
+\newcommand{\wsub}{w_0}
+\newcommand{\iprob}{p^{a_i}_{b_i,c_i}}
+\newcommand{\simb}{M_{a_i,b_i}}
+\newcommand{\simc}{M_{a_i,c_i}}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\softmax}{softmax}
+
+
+% TDA 
+\DeclareMathOperator{\pix}{pix}
+\DeclareMathOperator{\mult}{mult}
+\DeclareMathOperator{\topo}{\textbf{Top}}
+\DeclareMathOperator{\pair}{\textbf{Pair}}
+\DeclareMathOperator{\fdv}{\textbf{FDVec}}
+
+% Algebraic geometry
+\DeclareMathOperator{\mv}{\mathcal{V}}
+\DeclareMathOperator{\mvr}{V_\mr}
+
+
+
+% Thesis
+\DeclareMathOperator{\minp}{\textsc{MinPoint}}
+\DeclareMathOperator{\critp}{\textsc{CritPoint}}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
