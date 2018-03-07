@@ -16,8 +16,6 @@ parser.add_option("--processors",dest="number_of_bertini_processes",type=int,def
 (parameters,args) = parser.parse_args()
 parameters = parameters.__dict__
 
-# /cise/homes/pedwards/Documents/sampling_algorithm/BertiniLinuxMPI2_v1.5/bin/bertini
-#"/cise/homes/pedwards/Documents/sampling_algorithm/mpich-install/bin/mpiexec"
 if len(args) == 0: 
 	raise RuntimeError("No setup directory indicated. Exiting.")
 setup_directory_path = os.path.abspath(args[0])
@@ -80,10 +78,16 @@ with open(input_start_path,"w") as input_start_file:
 	+ "END;"
 	)
 
-
-mpi_executable_location = os.path.abspath(parameters["mpi_executable_location"])
-bertini_executable_location = os.path.abspath(parameters["bertini_executable_location"])
+if parameters["mpi_executable_location"] != "mpiexec":
+	mpi_executable_location = os.path.abspath(parameters["mpi_executable_location"])
+else: 
+	mpi_executable_location = "mpiexec"
+if parameters["bertini_executable_location"] != "bertini":
+	bertini_executable_location = os.path.abspath(parameters["bertini_executable_location"])
+else:
+	bertini_executable_location = "bertini"
 number_of_bertini_processes = parameters["number_of_bertini_processes"]
+
 with open(os.devnull,"w") as devnull:
 	if parameters["hosts"] is not None: 
 		call(args=[mpi_executable_location,"-np", str(number_of_bertini_processes),"-hosts",parameters["hosts"],bertini_executable_location,"input_start"],stdout=devnull.fileno(),cwd=minimizer_path)
