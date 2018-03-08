@@ -1,10 +1,17 @@
 \documentclass[11pt]{article}
-\include{macros}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb,amsfonts,amscd}
 \usepackage{graphicx}
-\usepackage{minted} 
+\usepackage{minted}
+
+\usemintedstyle{xcode}
+
+
+
+
+\include{macros}
+
 
 %=================================================
 
@@ -15,7 +22,6 @@
 %\evensidemargin 0in
 \topmargin -0.5in
 
-%\usepackage[notref,not]{showkeys}
 
 %=================================================
 
@@ -70,7 +76,9 @@ Parker Edwards
 }
 
 \maketitle
+
 \tableofcontents
+\pagebreak
 
 This manual is for Linux distributions, which is the only OS for which \texttt{tdasampling} has been tested.
 
@@ -154,22 +162,195 @@ Optionally, you can also add the binary folder to your PATH by modifying \textas
 The quick start will be sampling a quartic variety in 3 variables and 1 equation:
 
 \[
-4x^4+7y^4+3z^4-3-8x^3+2x^2y-4x^2-8xy^2-5xy+8x-6y^3+8y^2+4y = 0
+4x^4+7y^4+3z^4-3-8x^3+2x^2y-4x^2-8xy^2-5xy+8x-6y^3+8y^2+4y = 0\text{.} 
 \]
 
+It assumes you've gone through all the installation steps. For the sake of the example, we're using a virtualenv which is in our current working directory. 
 
+First step: Make a directory for the example. 
 
+\begin{minted}{shell} 
+$ mkdir quartic_example
+\end{minted} 
+
+Next we need to put a polynomial\_system file in the directory specifying the system to be 
+sampled. It looks like this: 
+
+\begin{minted}{shell}
+x,y,z
+4*x^4+7*y^4+3*z^4-3-8*x^3+2*x^2*y-4*x^2-8*x*y^2-5*x*y+8*x-6*y^3+8*y^2+4*y
+\end{minted} 
+
+The first line is a comma separated list of variables we used in the system. There is only one other line because there is only one equation in our polynomial system. Note that we needed to explicitly provide the operator * for multiplication. 
+
+The next step is to set up the Bertini parameter files using the setup script: 
+
+\begin{minted}{shell}
+$ bin/sampling-setup --processors 8 quartic_example/
+\end{minted} 
+
+The --processors 8 option tells the setup script to use 8 processes for homotopy 
+continuation. The setup script produced a directory quartic\_example/minimizer containing 
+all of the files. \\ \\
+\noindent Next we'll set up a parameters file. It is saved as quartic\_example/parameters.json and looks like this: 
+
+\begin{minted}{json} 
+{
+	"bounds": [-3.0,3.0,-3.0,3.0,-3.0,3.0],
+	"density_parameter": 5e-1,
+	"number_of_functions": 1, 
+	"number_of_processors_for_bertini": 4, 
+	"number_of_parallel_instances": 1
+}
+\end{minted} 
+
+This tells the algorithm that we are sampling the desired variety in the region $[-3.0,3.0] \times [-3.0,3.0] \times [-3.0,3.0] \subseteq \mr^3$ and that we want the sample to have density $0.5$.\\ \\ 
+
+The number\_of\_processors\_for\_bertini tells the algorithm how many processors to use per instance of the algorithm. The number of instances of the algorithm is given by number\_of\_parallel\_instances. These options are discussed in more depth in Section 4. The last step is to execute the sampling: \\ \\
+
+\begin{minted}{shell} 
+$ bin/tdasampling -p quartic_example
+\end{minted} 
+
+Output is placed in the file quratic\_example/500e-3\_sample.txt. There is some progress information displayed during execution. 
 
 \section{Advanced settings}
 
 \subsection{Parallelism}
+There are two levels of parallelism in the sampling algorithm: 
+\begin{enumerate}
+\item At the top level of parallelism, we can split the box where we're looking for samples into smaller boxes and run the sampling algorithm in parallel on the samples individually
+\item At the second level of parallelism, \texttt{bertini} is run repeatedly to solve systems produced by the algorithm. Putting more processors towards Bertini lowers the time cost of each of these loops. In general there will be (top-level)*(second-level) processes. 
+\end{enumerate} 
 
+There is a tradeoff between these two levels of parallelism. Roughly speaking, doubling 
+the number of processors doing either task will half the amount of time taken at that 
+level (per iteration). To inform your decision, you can check the top line of the file 
+minimizer/start\_points. The number in the top line roughly conveys the maximum number of 
+processes that Bertini will find useful. \\ \\ 
 
+\texttt{tdasampling} supports providing ssh hostnames for nodes on an ssh-accessible cluster. The hosts will be used for Bertini computations, {\bf but not for top level computations}. The top level sampling executions will all run on the executing machine. The minimizer directory must be accessible from all nodes. 
 
+\subsection{Options} 
+The options in this section are the keys to use in parameters.json files. Command line support is currently untested. 
 
+\subsubsection{bounds}
+Required. The region of Euclidean space in which to produce a sample. For a region $[x_1,y_1] \times\dots\times [x_n,y_n]$ input should be in the form: 
+\begin{minted}[mathescape]{json}
+{
+"bounds": [x_1,y_1,\dots,x_n,y_n]
+}
+\end{minted} 
 
+\subsubsection{density\_parameter}
+Required. Requested density of sampling. If $t$ is the float/double-valued density, input should be in the form: 
 
+\begin{minted}{json}
+{
+"density_parameter": t
+}
+\end{minted} 
 
+\subsubsection{number\_of\_functions}
+Required. Number of functions $n$ in polynomial system. 
+
+\begin{minted}{json} 
+{
+"number_of_functions": n
+}
+\end{minted}
+
+\subsubsection{number\_of\_parallel\_instances}
+Number $k$ of top level instances of the sampling algorithm to run. 
+
+\begin{minted}{json}
+{ 
+"number_of_parallel_instances": k
+}
+\end{minted} 
+
+\subsection{mpi\_executable\_location}
+
+If your mpiexec executable is not runnable via just ``mpiexec'', you can set this option to give a specific path to the executable. 
+
+\begin{minted}{json}
+{ 
+"mpi_executable_location": /a/path/to/mpiexec
+}
+\end{minted} 
+
+\subsection{bertini\_executable\_location} 
+
+If your bertini executable is not runnable via just ``bertini'', you can set this option to give a specific path to the executable. 
+
+\begin{minted}{json}
+{ 
+"bertini_executable_location": /a/path/to/bertini
+}
+\end{minted} 
+
+\subsection{number\_of\_processors\_for\_bertini}
+Number of processors $p$ to use for Bertini for each parallel instance of the algorithm. 
+
+\begin{minted}{json}
+{ 
+"number_of_processors_for_bertini": p
+}
+\end{minted} 
+
+\subsection{hosts} 
+List of SSH names for hosts to use during parallel Bertini runs. Processors are currently assigned to hosts on a cylcic bases in the order they appear in the hosts list. In particular, if the number of processors you request isn't a multiple of the number of hosts, the hosts earlier in the list will be assigned more processes. The following is an example list of hosts.
+
+\begin{minted}{json}
+{ 
+"hosts": "linhost1,linhost2,adifferenthost15,localhost"
+}
+\end{minted}  
+
+\subsection{skip\_interval} 
+One of the parameters controlling the heuristics for keeping the number of points in the final sample low. Should be a number $t \in (0,1)$. Lower numbers correspond to fewer points, but more compute time. The default is recommended.
+
+\begin{minted}{json}
+{ 
+"skip_interval": t
+}
+\end{minted} 
+
+\subsection{rolling\_average\_length} 
+One of the parameters controlling heuristics for keeping the number of points in the final sample low. Should be an integer $k$. In general, it may be useful to set this parameter higher if the polynomial system you're solving has a larger number of start\_points. Defaults should perform decently.
+
+\begin{minted}{json}
+{ 
+"rolling_average_length": k
+}
+\end{minted} 
+
+\subsection{number\_of\_allowed\_skips}
+One of the parameters controlling heuristics for keeping the number of points in the final sample low. Should be an integer $p$ which is less than the rolling\_average\_length. Higher numbers correspond to fewer points, but more compute time. Defaults should perform decently.
+
+\begin{minted}{json}
+{ 
+"number_of_allowed_skips": p
+}
+\end{minted} 
+
+\subsection{variable\_indices}
+For advanced users. If you have generated your own parameter homotopy files, and the relevant variables (in order) to extract are not the first \emph{dimensionality} ones, you can list alternative variables (in whatever order) instead. 
+
+\begin{minted}{json}
+{ 
+"variable_indices": [index1,index2,...,indexk]
+}
+\end{minted} 
+
+\section{Other considerations} 
+
+\subsection{Cleaning up interrupted runs}
+If a sampling run crashes for any reason, the current code does not clean up its computation files. Those files are placed in minimizer/computation\_directory if doing an SSH based run. They are placed in folders of the form /tmp/tmp* otherwise. You can clean them up, for instance in the latter case, with
+
+\begin{minted}{shell} 
+$ rm -rf /tmp/tmp*
+\end{minted}  
 
 
 \end{document}

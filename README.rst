@@ -30,7 +30,7 @@ The package installs two command line scripts:
 See the included tutorial for detailed information about all the
 different options.
 
-Version 1.0.2
+Version 1.0.3
 -------------
 
 Basic usage for tdasampling

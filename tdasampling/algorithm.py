@@ -165,7 +165,7 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 
 		counter += 1
 		if counter % 100 == 0: 
-			print "Checking cover: ", space.global_bounds,"# of bad boxes: ", len(space.bad_boxes)
+			print "The algorithm instance checking bounds: ", space.global_bounds,"has boxes remaining: ", len(space.bad_boxes)
 
 
 

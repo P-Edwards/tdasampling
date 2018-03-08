@@ -47,7 +47,11 @@ if not os.path.exists(global_template_location):
 if parameters["parameter_file"] == True: 
 	parameters_path = os.path.join(template_stem,"parameters.json")
 	with open(parameters_path,"r") as f: 
-		parameters = json.load(f)
+		parameters2 = json.load(f)
+	for key in list(parameters.keys()): 
+		if key not in parameters2: 
+			parameters2[key] = parameters[key]
+	parameters = parameters2
 else: 
 	if len(args) != 4: 
 		raise RuntimeError("Incorrect number of arguments.")
