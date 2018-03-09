@@ -110,37 +110,40 @@ $ make
 $ sudo make install
 \end{minted} 
 
-If you don't have root access to the installation machine, you'll want to install libspatialindex into a non-standard location. You do not need to place the \texttt{libspatial} source files in the same directory.
+If you don't have root access to the installation machine, you'll want to install libspatialindex into a non-standard location. For reasons that are currently unclear to me, Ctypes throws errors even if you install the libraries in a non-standard location. Instead, you can do the following. Note the lack of ``make install''.
 
 \begin{minted}{shell} 
 $ curl http://download.osgeo.org/libspatialindex/spatialindex-src-1.8.5.tar.gz | tar xvz
 $ cd spatialindex-src-1.8.5/
 $ cmake -DCMAKE_INSTALL_PREFIX=/home/parker/test_dir/local .
 $ make 
-$ make install
 \end{minted} 
+
 
 \subsubsection{Adjusting rtree if libspatialindex is installed without root access}
 The \texttt{Rtree} Python package provides a Python interface over \texttt{libspatialindex} using Ctypes. If you have installed the \texttt{libspatialindex} library non-globally (without root access), then it has a hard time locating the library files. The \texttt{Rtree} package provides an environment variable you can export in your shell to fix this, but you have to export it every time you want to use \texttt{tdasampling}. An example: 
 
 \begin{minted}{shell} 
-$ export SPATIALINDEX_C_LIBRARY="/home/parker/test_dir/local/lib/
-libspatialindex_c.so.4"
+$ export SPATIALINDEX_C_LIBRARY=
+"/home/parker/test_dir/spatialindex-src-1.8.5/bin/libspatialindex_c.so"
 \end{minted} 
 
-As an alternative, you can just hard code the non-standard location of your libspatialindex files via the following command. If you change the location of libspatial, you'll need to update it again. The general form is: 
+As an alternative, you can just hard code the non-standard location of your libspatialindex files via the following command. If you change the location of libspatial, you'll need to update it again. An example of the location of the source file is /home/parker/test\_dir/lib/python2.7/site-packages/rtree/core.py. The line you need to change is line 122. It looks like this (with surrounding context):
 
-\begin{minted}{shell} 
-$ sed -i "s/find_library('libspatialindex_c')/'\/a\/path\/to\/
-libspatialindex_c\.so\.4'/g" /a/path/to/your/rtree/source/core.py
+\begin{minted}{python} 
+    if 'SPATIALINDEX_C_LIBRARY' in os.environ:
+        lib_name = os.environ['SPATIALINDEX_C_LIBRARY']
+    else:
+        lib_name = find_library('libspatialindex_c')
 \end{minted} 
 
-The escape characters are unfortunately necessary from the command line. A specific example is:
+This should be changed to something that looks like this: 
 
 \begin{minted}{shell} 
-$ sed -i "s/find_library('spatialindex_c')/'\/home\/parker\/test_dir\/
-local\/lib\/libspatialindex_c.so.4'/g" \
-/home/parker/test_dir/lib/python2.7/site-packages/rtree/core.py
+    if 'SPATIALINDEX_C_LIBRARY' in os.environ:
+        lib_name = os.environ['SPATIALINDEX_C_LIBRARY']
+    else:
+        lib_name = '/home/parker/test_dir/spatialindex-src-1.8.5/bin/libspatialindex_c.so'
 \end{minted} 
 
 If you make this adjustment, you won't have to worry about exporting environmental variables every time you want to use \texttt{rtree}.
@@ -269,7 +272,7 @@ Number $k$ of top level instances of the sampling algorithm to run.
 }
 \end{minted} 
 
-\subsection{mpi\_executable\_location}
+\subsubsection{mpi\_executable\_location}
 
 If your mpiexec executable is not runnable via just ``mpiexec'', you can set this option to give a specific path to the executable. 
 
@@ -279,7 +282,7 @@ If your mpiexec executable is not runnable via just ``mpiexec'', you can set thi
 }
 \end{minted} 
 
-\subsection{bertini\_executable\_location} 
+\subsubsection{bertini\_executable\_location} 
 
 If your bertini executable is not runnable via just ``bertini'', you can set this option to give a specific path to the executable. 
 
@@ -289,7 +292,7 @@ If your bertini executable is not runnable via just ``bertini'', you can set thi
 }
 \end{minted} 
 
-\subsection{number\_of\_processors\_for\_bertini}
+\subsubsection{number\_of\_processors\_for\_bertini}
 Number of processors $p$ to use for Bertini for each parallel instance of the algorithm. 
 
 \begin{minted}{json}
@@ -298,7 +301,7 @@ Number of processors $p$ to use for Bertini for each parallel instance of the al
 }
 \end{minted} 
 
-\subsection{hosts} 
+\subsubsection{hosts} 
 List of SSH names for hosts to use during parallel Bertini runs. Processors are currently assigned to hosts on a cylcic bases in the order they appear in the hosts list. In particular, if the number of processors you request isn't a multiple of the number of hosts, the hosts earlier in the list will be assigned more processes. The following is an example list of hosts.
 
 \begin{minted}{json}
@@ -307,7 +310,7 @@ List of SSH names for hosts to use during parallel Bertini runs. Processors are 
 }
 \end{minted}  
 
-\subsection{skip\_interval} 
+\subsubsection{skip\_interval} 
 One of the parameters controlling the heuristics for keeping the number of points in the final sample low. Should be a number $t \in (0,1)$. Lower numbers correspond to fewer points, but more compute time. The default is recommended.
 
 \begin{minted}{json}
@@ -316,7 +319,7 @@ One of the parameters controlling the heuristics for keeping the number of point
 }
 \end{minted} 
 
-\subsection{rolling\_average\_length} 
+\subsubsection{rolling\_average\_length} 
 One of the parameters controlling heuristics for keeping the number of points in the final sample low. Should be an integer $k$. In general, it may be useful to set this parameter higher if the polynomial system you're solving has a larger number of start\_points. Defaults should perform decently.
 
 \begin{minted}{json}
@@ -325,7 +328,7 @@ One of the parameters controlling heuristics for keeping the number of points in
 }
 \end{minted} 
 
-\subsection{number\_of\_allowed\_skips}
+\subsubsection{number\_of\_allowed\_skips}
 One of the parameters controlling heuristics for keeping the number of points in the final sample low. Should be an integer $p$ which is less than the rolling\_average\_length. Higher numbers correspond to fewer points, but more compute time. Defaults should perform decently.
 
 \begin{minted}{json}
@@ -334,7 +337,7 @@ One of the parameters controlling heuristics for keeping the number of points in
 }
 \end{minted} 
 
-\subsection{variable\_indices}
+\subsubsection{variable\_indices}
 For advanced users. If you have generated your own parameter homotopy files, and the relevant variables (in order) to extract are not the first \emph{dimensionality} ones, you can list alternative variables (in whatever order) instead. 
 
 \begin{minted}{json}
