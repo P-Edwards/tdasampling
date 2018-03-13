@@ -94,7 +94,7 @@ with open(os.devnull,"w") as devnull:
 	else: 
 		call(args=[mpi_executable_location,"-np", str(number_of_bertini_processes),bertini_executable_location,"input_start"],stdout=devnull.fileno(),cwd=minimizer_path)
 
-os.rename(os.path.join(minimizer_path,"finite_solutions"),os.path.join(minimizer_path,"start_points"))
+os.rename(os.path.join(minimizer_path,"nonsingular_solutions"),os.path.join(minimizer_path,"start_points"))
 
 input_param_path = os.path.join(minimizer_path,"input_param")
 with open(input_param_path,"w") as input_param_file: 
