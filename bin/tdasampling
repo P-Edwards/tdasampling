@@ -2,6 +2,7 @@
 from tdasampling import sampling_algorithm
 from tdasampling.search_space import _splitBoxAlongDimension
 from multiprocessing import Process,Manager
+import multiprocessing
 import math,sys,os
 import numpy as np
 import json
@@ -126,21 +127,27 @@ while len(list_of_instance_bounds) < number_of_instances:
 points_queues = list()
 rectangle_queues = list()
 sample_rectangles_queues = list() 
-process_list = list()
+process_argument_list = list()
 manager = Manager()
 for box in list_of_instance_bounds: 
 	points_queues += [manager.Queue()]
 	rectangle_queues += [manager.Queue()]
 	sample_rectangles_queues += [manager.Queue()]
-	arguments = (global_template_location,number_of_functions,box,density_parameter,rounding_precision,
+	arguments = [global_template_location,number_of_functions,box,density_parameter,rounding_precision,
 		points_queues[-1],rectangle_queues[-1],sample_rectangles_queues[-1],
-		computation_options,False,previous_run_data,variables_to_check)
-	process_list += [Process(target=sampling_algorithm,args=arguments)]
-	process_list[-1].start()
+		computation_options,False,previous_run_data,variables_to_check]
+	process_argument_list += [arguments]
 
-print "started subprocesses"
-for process in process_list: 
-	process.join()
+
+def wrap_sampling_algorithm(abc): 
+	return sampling_algorithm(*abc)
+	
+if parameters["total_number_of_processors"] is None: 
+	total_processors = multiprocessing.cpu_count()/2
+else: 
+	total_processors = parameters["total_number_of_processors"]
+p = multiprocessing.Pool(total_processors)
+p.map(wrap_sampling_algorithm,process_argument_list)
 
 # Extract sampled points from individual algorithm instances
 p_out = list()

@@ -26,7 +26,6 @@ def check_for_nonzero_entry(input_list):
 
 
 def sampling_algorithm(global_template_location,number_of_functions,bounds,density_parameter,rounding_precision,points_queue,rectangles_queue,sample_rectangles_queue,computation_options=dict(),eval_template_location=False,smaller_box_info=False,variable_indices=[]):
-	
 	# These files are required for the algorithm
 	if not os.path.exists(os.path.join(global_template_location,"input_param")): 
 		raise RuntimeError("No parameter homotopy file input_param found in directory " + global_template_location)
@@ -38,7 +37,7 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 	if computation_options.has_key("mpi_executable_location"): 
 		mpi_executable_location = computation_options["mpi_executable_location"]
 	else: 
-		mpi_executable_location = "mpiexec"
+		mpi_executable_location = "mpirun"
 
 	if computation_options.has_key("bertini_executable_location"): 
 		bertini_executable_location = computation_options["bertini_executable_location"]
@@ -68,17 +67,11 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 		heuristics_options = None
 
 	if smaller_box_info: 	
-		space = ss(density_parameter,rounding_precision,bounds,smaller_box_info["data"],smaller_box_info["density"])
+		space = ss(density_parameter,rounding_precision,bounds,smaller_box_info["data"],smaller_box_info["density"],heuristics_options)
 	else: 
-		space = ss(density_parameter,rounding_precision,bounds)
+		space = ss(density_parameter,rounding_precision,bounds,heuristics_options=heuristics_options)
 	dimensionality = space.dimension
-
-	# Step 1: Gather the local information and add it to the space
-	process_list = list([])
-	manager = multiprocessing.Manager() 
-	return_queue = manager.Queue()
 	
-
 
 	if distributed_run_flag: 
 		run_path = os.path.join(global_template_location,"computation_directory")
@@ -172,6 +165,7 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 	rmtree(run_path)
 
 	sample_points = space.outputSamplePoints()
+	print "Sample points for bounds " + str(bounds) + " are " + str(sample_points)
 	if len(sample_points) > 0: 
 		points_queue.put([list(point) for point in sample_points])
 

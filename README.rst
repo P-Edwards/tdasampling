@@ -1,4 +1,4 @@
-# tdasampling
+tdasampling
 -------------
 
 Copyright (C) 2018 `Parker

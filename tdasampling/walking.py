@@ -99,7 +99,10 @@ def bertiniMinimizer(run_path,input_point,number_of_bertini_processes,number_of_
 	final_parameters_file.write(constructFinalParametersString(input_point,False,number_of_functions))
 	final_parameters_file.close()
 	if hosts is None: 
-		call(args=["timeout",str(MAX_TIME)+"s",mpi_executable,"-np", str(number_of_bertini_processes), bertini_executable,"input_param","start_points"],stdout=devnull.fileno(),cwd=run_path)
+		if number_of_bertini_processes == 1: 
+			call(args=["timeout",str(MAX_TIME)+"s",bertini_executable,"input_param","start_points"],stdout=devnull.fileno(),cwd=run_path)	
+		else: 
+			call(args=["timeout",str(MAX_TIME)+"s",mpi_executable,"-np", str(number_of_bertini_processes), bertini_executable,"input_param","start_points"],stdout=devnull.fileno(),cwd=run_path)
 	else: 
 		call(args=["timeout",str(MAX_TIME)+"s",mpi_executable,"-np", str(number_of_bertini_processes),"-hosts",hosts,bertini_executable,"input_param","start_points"],stdout=devnull.fileno(),cwd=run_path)
 
