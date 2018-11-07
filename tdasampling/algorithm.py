@@ -123,13 +123,13 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 		
 		# It's highly unlikely but technically possible to hit an exceptional test point 
 		# value. This handles that case.
-		if min_distance_results['distance'] == 0: 
-			# Pick random unit vector     
+		if min_distance_results['points'] is False: 
+			print "Test point (skipped): ", test_point
+			# Pick random unit vector    
 			rand_vector = np.random.normal(size=dimensionality)
 			rand_vector = rand_vector/np.linalg.norm(rand_vector)
 			test_point = np.array(test_point) + rand_vector
 			test_point = list(test_point)
-			print "Test point (skipped): ", test_point
 			continue
 
 		space.addPoint(test_point,min_distance_results['distance'])
@@ -146,6 +146,8 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 			filtered_points = [points[index] for index in xrange(len(points)) if check_for_nonzero_entry(evaluated_points[index])]
 			points = filtered_points
 
+		if len(points) == 0: 
+			print "Seemingly no sample points being returned for ", test_point
 		for point in points: 
 			space.addPoint(point,is_sample_point=True,skip_on_covered=True)
 		# Breaks out of loops where we're getting the same test point over and over

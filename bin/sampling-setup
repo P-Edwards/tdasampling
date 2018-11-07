@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/ufrc/bubenik/pedwards/samp_algorithm/bin/python
 from sympy import symbols,diff
 from sympy.parsing.sympy_parser import parse_expr
 from subprocess import call
@@ -8,9 +8,9 @@ import os
 usage = ("Usage: %prog [options] path_to_directory_to_setup")
 
 parser = OptionParser(usage)
-parser.add_option("--mpiexecutable",dest="mpi_executable_location",default="mpiexec",help="Use this option to specify a path to mpiexec if it is not in your PATH by defualt.")
+parser.add_option("--mpiexecutable",dest="mpi_executable_location",default="mpiexec",help="Use this option to specify a path to mpiexec if it is not in your PATH by default.")
 parser.add_option("--hosts",dest="hosts",help="Comma separated list of ssh host names to use for MPI functionality of Bertini.")
-parser.add_option("--bertini",dest="bertini_executable_location",default="bertini",help="Use this option to specify a path to bertini if it is not in your PATH by defualt.")
+parser.add_option("--bertini",dest="bertini_executable_location",default="bertini",help="Use this option to specify a path to bertini if it is not in your PATH by default.")
 parser.add_option("--processors",dest="number_of_bertini_processes",type=int,default=1,help="Number of processors to use for solving initial system using Bertini.")
 
 (parameters,args) = parser.parse_args()
@@ -92,7 +92,10 @@ with open(os.devnull,"w") as devnull:
 	if parameters["hosts"] is not None: 
 		call(args=[mpi_executable_location,"-np", str(number_of_bertini_processes),"-hosts",parameters["hosts"],bertini_executable_location,"input_start"],stdout=devnull.fileno(),cwd=minimizer_path)
 	else: 
-		call(args=[mpi_executable_location,"-np", str(number_of_bertini_processes),bertini_executable_location,"input_start"],stdout=devnull.fileno(),cwd=minimizer_path)
+		if number_of_bertini_processes == 1: 
+			call(args=[bertini_executable_location,"input_start"],stdout=devnull.fileno(),cwd=minimizer_path)
+		else: 	
+			call(args=[mpi_executable_location,"-np", str(number_of_bertini_processes),bertini_executable_location,"input_start"],stdout=devnull.fileno(),cwd=minimizer_path)
 
 os.rename(os.path.join(minimizer_path,"nonsingular_solutions"),os.path.join(minimizer_path,"start_points"))
 

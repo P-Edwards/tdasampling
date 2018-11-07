@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 from tdasampling import sampling_algorithm
 from tdasampling.search_space import _splitBoxAlongDimension
 from multiprocessing import Process,Manager
@@ -19,6 +18,7 @@ parser.add_option("--homparallel",type="int",dest="number_of_processors_for_bert
 parser.add_option("-p","--parameters",action="store_true",dest="parameter_file",default=False,help="Set this flag if you want to use parameters file. The only required argument when this flag is present is polynomial_system_directory.")
 parser.add_option("--mpiexecutable",dest="mpi_executable_location",help="Use this option to specify a path to mpiexec if it is not in your PATH by defualt.")
 parser.add_option("--bertini",dest="bertini_executable_location",help="Use this option to specify a path to bertini if it is not in your PATH by defualt.")
+parser.add_option("--totalprocessors",dest="total_number_of_processors",type=int,help="Specify the total number of processing threads to be used on the executing machine.")
 parser.add_option("--errorlimit",dest="rounding_precision",type=float,default=1e-7,help="Specify the maximum distance of points returned by homotopy continuation from the variety.")
 parser.add_option("--output",dest="output_file_name",help="Specify non-standard output file name.")
 parser.add_option("--dimensionality",dest="dimensionality",type="int",help="Number of variables in polynomial system. Setting this option will check to make sure you have provided the right number of bounds.")
@@ -30,6 +30,7 @@ parser.add_option("--avglength",dest="rolling_average_length",type=int,help="Num
 parser.add_option("--allowedskips",dest="number_of_allowed_skips",type=int,help="Number of remembered points which are allowed to be skips before increasing permissiveness. Defaults recommended.")
 parser.add_option("--outpath",dest="output_path",help="File name of output file if you do not want to use the default. Can be in any directory.")
 parser.add_option("--varindices",dest="variable_indices",help="Comma separated list of indices of minimizer variables in minimizer file.")
+
 
 (parameters,args) = parser.parse_args()
 parameters = parameters.__dict__
@@ -137,8 +138,13 @@ for box in list_of_instance_bounds:
 		points_queues[-1],rectangle_queues[-1],sample_rectangles_queues[-1],
 		computation_options,False,previous_run_data,variables_to_check]
 	process_argument_list += [arguments]
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> 6025f5c4702066d4e435338c85bfc7f7d6df397b
 def wrap_sampling_algorithm(abc): 
 	return sampling_algorithm(*abc)
 	
