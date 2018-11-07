@@ -393,9 +393,6 @@ class Search_Space(object):
 			if self._checkRectangleAgainstBall(bounds,ball) is True:
 				return True
 
-		intersection_sizes = [_sizeOfIntersectionWithBall(ball,bounds) for ball in intersecting_balls]
-		index = np.argmax(intersection_sizes)
-
 		# It's possible that the input_bounds intersected the ball on its edge, 
 		# or that none of the balls being tracked actually intersect the input_bounds
 		# (this can happen because of the discrepancy between the spatial boxes in which we're storing the
