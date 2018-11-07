@@ -7,7 +7,7 @@ with open(path.join(here,"README.rst"),"r") as readmefile:
 	readme = readmefile.read()
 
 setup(name="tdasampling", 
-	version="1.1.0", 
+	version="1.1.1", 
 	description="Compute dense samples of real algebraic varieties for use with topological data analysis tools.", 
 	long_description=readme,
 	url="https://github.com/P-Edwards/tdasampling",
