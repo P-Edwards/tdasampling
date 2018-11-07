@@ -30,11 +30,7 @@ The package installs two command line scripts:
 See the included tutorial for detailed information about all the
 different options.
 
-<<<<<<< HEAD
 Version 1.1.1
-=======
-Version 1.1.0
->>>>>>> 6025f5c4702066d4e435338c85bfc7f7d6df397b
 -------------
 
 Basic usage for tdasampling
