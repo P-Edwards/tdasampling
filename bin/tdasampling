@@ -138,13 +138,7 @@ for box in list_of_instance_bounds:
 		points_queues[-1],rectangle_queues[-1],sample_rectangles_queues[-1],
 		computation_options,False,previous_run_data,variables_to_check]
 	process_argument_list += [arguments]
-<<<<<<< HEAD
 
-
-=======
-
-
->>>>>>> 6025f5c4702066d4e435338c85bfc7f7d6df397b
 def wrap_sampling_algorithm(abc): 
 	return sampling_algorithm(*abc)
 	
