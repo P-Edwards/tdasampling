@@ -393,14 +393,6 @@ class Search_Space(object):
 			if self._checkRectangleAgainstBall(bounds,ball) is True:
 				return True
 
-		# It's possible that the input_bounds intersected the ball on its edge, 
-		# or that none of the balls being tracked actually intersect the input_bounds
-		# (this can happen because of the discrepancy between the spatial boxes in which we're storing the
-		# balls can be bigger than the balls themselves)
-		if intersection_sizes[index] <= 0.0: 
-			return False
-		
-		intersecting_balls = [(deinterleave(item.bbox),item.object) for item in intersecting_balls]
 		def replace_with_epsilon(ball): 
 			if ball[1][1] is True: 
 				return (ball[0],(ball[1][0],self.epsilon))
