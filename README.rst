@@ -1,7 +1,7 @@
 tdasampling
 -------------
 
-Copyright (C) 2018 `Parker
+Copyright (C) 2019 `Parker
 Edwards <https://people.clas.ufl.edu/pedwards>`__
 
 External requirements
@@ -30,7 +30,7 @@ The package installs two command line scripts:
 See the included tutorial for detailed information about all the
 different options.
 
-Version 1.1.2
+Version 1.1.3
 -------------
 
 Basic usage for tdasampling

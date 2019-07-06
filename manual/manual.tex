@@ -110,7 +110,7 @@ $ make
 $ sudo make install
 \end{minted} 
 
-If you don't have root access to the installation machine, you'll want to install libspatialindex into a non-standard location. For reasons that are currently unclear to me, Ctypes throws errors even if you install the libraries in a non-standard location. Instead, you can do the following. Note the lack of ``make install''.
+If you don't have root access to the installation machine, you'll want to install libspatialindex into a non-standard location. Ctypes throws errors even if you install the libraries in a non-standard location. Instead, you can do the following. Note the lack of ``make install''.
 
 \begin{minted}{shell} 
 $ curl http://download.osgeo.org/libspatialindex/spatialindex-src-1.8.5.tar.gz | tar xvz
@@ -222,7 +222,7 @@ Output is placed in the file quratic\_example/500e-3\_sample.txt. There is some 
 \subsection{Parallelism}
 There are two levels of parallelism in the sampling algorithm: 
 \begin{enumerate}
-\item At the top level of parallelism, we can split the box where we're looking for samples into smaller boxes and run the sampling algorithm in parallel on the samples individually
+\item At the top level of parallelism, we can split the box where we're looking for samples into smaller boxes and run the sampling algorithm in parallel on the smaller boxes individually
 \item At the second level of parallelism, \texttt{bertini} is run repeatedly to solve systems produced by the algorithm. Putting more processors towards Bertini lowers the time cost of each of these loops. In general there will be (top-level)*(second-level) processes. 
 \end{enumerate} 
 

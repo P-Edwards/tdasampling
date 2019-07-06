@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-from sympy import symbols,diff
+rom sympy import symbols,diff
 from sympy.parsing.sympy_parser import parse_expr
 from subprocess import call
 from optparse import OptionParser
@@ -115,10 +115,3 @@ with open(input_param_path,"w") as input_param_file:
 	+ "\n"
 	+ "END;"
 	)
-
-
-
-	
-
-
-

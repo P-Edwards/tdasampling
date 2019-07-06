@@ -113,7 +113,6 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 	# Only start adding sample points once the exclusion boxes have gotten uselessly small
 	# in order to reduce number of samples
 
-	print "Test point: ", test_point
 	
 
 	# This counter controls the progress output
@@ -124,7 +123,6 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 		# It's highly unlikely but technically possible to hit an exceptional test point 
 		# value. This handles that case.
 		if min_distance_results['points'] is False: 
-			print "Test point (skipped): ", test_point
 			# Pick random unit vector    
 			rand_vector = np.random.normal(size=dimensionality)
 			rand_vector = rand_vector/np.linalg.norm(rand_vector)
@@ -146,8 +144,6 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 			filtered_points = [points[index] for index in xrange(len(points)) if check_for_nonzero_entry(evaluated_points[index])]
 			points = filtered_points
 
-		if len(points) == 0: 
-			print "Seemingly no sample points being returned for ", test_point
 		for point in points: 
 			space.addPoint(point,is_sample_point=True,skip_on_covered=True)
 		# Breaks out of loops where we're getting the same test point over and over
@@ -160,14 +156,13 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 
 		counter += 1
 		if counter % 100 == 0: 
-			print "The algorithm instance checking bounds: ", space.global_bounds,"has boxes remaining: ", len(space.bad_boxes)
+			print "\n The algorithm instance checking bounds: ", space.global_bounds,"has boxes remaining: ", len(space.bad_boxes), "\n"
 
 
 
 	rmtree(run_path)
 
 	sample_points = space.outputSamplePoints()
-	print "Sample points for bounds " + str(bounds) + " are " + str(sample_points)
 	if len(sample_points) > 0: 
 		points_queue.put([list(point) for point in sample_points])
 

@@ -7,7 +7,7 @@ import math,sys,os
 import numpy as np
 import json
 from optparse import OptionParser
-np.set_printoptions(threshold=np.nan)
+np.set_printoptions(threshold=np.inf)
 
 usage = ("Usage: %prog [options] bounds density number_of_functions_in_system "
  "polynomial_system_directory\n Bounds should be of the form x_1,y_1,...,x_n,y_n for"
@@ -148,7 +148,10 @@ if parameters["total_number_of_processors"] is None:
 else: 
 	total_processors = parameters["total_number_of_processors"]
 p = multiprocessing.Pool(total_processors)
-p.map(wrap_sampling_algorithm,process_argument_list)
+# The map_async and get timeout is a bug workaround for getting ctrl+C to work correctly. 
+# See https://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool
+process_pool = p.map_async(wrap_sampling_algorithm,process_argument_list).get(9e10)
+process_pool.wait()
 
 # Extract sampled points from individual algorithm instances
 p_out = list()
@@ -183,10 +186,3 @@ if parameters["output_path"] is not None:
 else: 
 	output_path = os.path.join(template_stem,sample_name)
 np.savetxt(output_path,p_out,delimiter=",")
-
-
-
-
-
-
-

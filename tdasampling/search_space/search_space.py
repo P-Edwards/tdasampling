@@ -49,8 +49,6 @@ def _constructHypercube(dimension):
 	return zero_list + one_list 
 
 
-
-
 def deinterleave(interleaved):
     dimension = len(interleaved) // 2
     def gen(): 
@@ -67,6 +65,7 @@ def _matlabRectangleFormat(box):
 	else: 
 		rstr = "cubePlot([%1.8f,%1.8f,%1.8f],%1.8f,%1.8f,%1.8f,\'r\')" %(box[0],box[2],box[4],box[1]-box[0],box[3]-box[2],box[5]-box[4])
 	return rstr
+
 
 def _splitBox(bounds,list_of_grid_points=False):
 	if not list_of_grid_points: 
@@ -110,7 +109,6 @@ def _splitBoxAlongDimension(box_to_split,input_split_points,dimension):
 	new_ranges_in_given_dimension = [[split_points[i],split_points[i+1]] for i in xrange(len(split_points)-1)]
 	for value_range in new_ranges_in_given_dimension: 
 		if value_range[0] >= value_range[1]: 
-			print "Error when trying to split ", box_to_split, " with split points: ", input_split_points
 			return False
 	output_boxes = list()
 	for value_range in new_ranges_in_given_dimension: 
@@ -133,15 +131,18 @@ def _splitAlongIntersectingBox(box_to_split,box_to_intersect):
 
 
 	output_boxes = [box_to_split]
+	finished_boxes = list()
 	for dimension in xrange(0,len(intersection)): 
 		new_output_boxes = list()
 		for box in output_boxes: 
-			broken_down_box = _splitBoxAlongDimension(box,intersection[dimension],dimension)
+			if _findSizeOfIntersection(box,box_to_intersect) == 0.0: 
+				finished_boxes += [box]
+			else:
+				broken_down_box = _splitBoxAlongDimension(box,intersection[dimension],dimension)
+				new_output_boxes += broken_down_box
 			if broken_down_box is False: 
-				print "Error when trying to split: ", box_to_split, " along the box: ", box_to_intersect
-			new_output_boxes += broken_down_box
 		output_boxes = new_output_boxes
-	return output_boxes
+	return finished_boxes+output_boxes
 
 def _findIntersectionPoints(first_box,second_box): 
 	intersection = list() 
@@ -157,11 +158,8 @@ def _findIntersectionPoints(first_box,second_box):
 def _findSizeOfIntersection(first_box,second_box): 
 	intersection = list() 
 	for coordinate in xrange(0,len(first_box),2): 
-		if first_box[coordinate] < second_box[coordinate] or first_box[coordinate] > second_box[coordinate+1]: 
-			if first_box[coordinate+1] < second_box[coordinate+1] or first_box[coordinate+1] > second_box[coordinate+1]: 
-				if second_box[coordinate] < first_box[coordinate] or second_box[coordinate] > first_box[coordinate+1]: 
-					if second_box[coordinate+1] < first_box[coordinate+1] or second_box[coordinate+1] > first_box[coordinate+1]: 
-						return 0.0
+		if first_box[coordinate+1] < second_box[coordinate] or first_box[coordinate] > second_box[coordinate+1]: 
+			return 0.0
 
 		intersection += [max(first_box[coordinate],second_box[coordinate]),min(first_box[coordinate+1],second_box[coordinate+1])]
 	return _maxLengthOfBox(intersection) 
@@ -192,12 +190,36 @@ def _createLargeRadiusBox(point,radius):
 		box_coordinates.append(coordinate + range_length)
 	return box_coordinates
 
+def _checkRectangleAgainstBall(bounding_rectangle,ball): 
+	center_point_of_ball =  ball.point
+	total_dimension = len(bounding_rectangle)/2
+	corners_of_rectangle = [[bounding_rectangle[2*dimension + hypercube_corner[dimension]] for dimension in range(total_dimension)] for hypercube_corner in _constructHypercube(total_dimension)]
+
+	corners_of_rectangle = [np.array(corner) for corner in corners_of_rectangle]
+	def distance_to_center(point): 
+		return np.dot(np.array(point) - np.array(center_point_of_ball),np.array(point) - np.array(center_point_of_ball))
+
+	distances = [distance_to_center(corner) for corner in corners_of_rectangle]
+
+	max_distance = np.amax(distances)	
+
+	if max_distance > ball.radius**2: 
+		return False
+	else:
+		return True
+
+
 class search_box(object): 
 	def __init__(self,box,radius=0.0): 
 		self.box = np.array(box)
 		self.measure = _maxLengthOfBox(box)
 		self.radius = radius
 
+class indexed_box_label(object): 
+	def __init__(self,point,radius,is_sample_point=False):
+		self.point = point
+		self.radius = radius
+		self.is_sample_point = is_sample_point
 
 class Search_Space(object): 
 
@@ -263,58 +285,6 @@ class Search_Space(object):
 			box_coordinates.append(coordinate + range_length)
 		return box_coordinates
 
-
-	# Ball is a pair of type (box,(point,radius))
-	def _checkRectangleAgainstBall(self,bounding_rectangle,ball): 
-		center_point_of_ball =  ball[1][0]
-		total_dimension = len(bounding_rectangle)/2
-		corners_of_rectangle = [[bounding_rectangle[2*dimension + hypercube_corner[dimension]] for dimension in range(total_dimension)] for hypercube_corner in _constructHypercube(total_dimension)]
-
-		corners_of_rectangle = [np.array(corner) for corner in corners_of_rectangle]
-		def distance_to_center(point): 
-			return np.linalg.norm(np.array(point) - np.array(center_point_of_ball))
-
-		distances = [distance_to_center(corner) for corner in corners_of_rectangle]
-
-		max_distance = np.amax(distances)	
-		
-
-		if ball[1][1] == True: 
-			radius = self.epsilon
-		else: 
-			radius = ball[1][1]
-
-		if max_distance > radius: 
-			return False
-		else: 
-			return True
-
-	# ball is in form (bounding box,(point,radius)) 
-	def _sizeOfIntersectionWithBall(self,box,ball): 
-		center_point_of_ball = ball[1][0]
-		if ball[1][1] == True:
-			radius = self.epsilon
-		else: 
-			radius = ball[1][1]
-
-		total_dimension = len(box)/2
-		corners_of_rectangle = [[box[2*dimension + hypercube_corner[dimension]] for dimension in range(total_dimension)] for hypercube_corner in _constructHypercube(total_dimension)]
-		corners_of_rectangle = [np.array(corner) for corner in corners_of_rectangle]
-		def distance_to_center(point): 
-			return np.linalg.norm(point - center_point_of_ball)
-
-		distances = [distance_to_center(corner) for corner in corners_of_rectangle]
-		# In this case, the ball is contained in the box; 
-		# the size of their intersection is the entire ball
-		distance = radius - np.amin(distances)
-		if distance > 0 and np.amax(distances) >= radius: 
-			return radius 
-		# In this case, the ball and box do not intersect, so they have 
-		# 0 size of intersection
-		if distance < 0: 
-			return 0.0
-		else:
-			return distance
 	
 	def _skipControl(self,is_skipped): 
 		if len(self.skip_list) == self.rolling_average_length: 
@@ -340,10 +310,9 @@ class Search_Space(object):
 			return
 		else: 
 			radius = radius - self.delta
-		label = (point,radius)
+		label = indexed_box_label(point,radius,is_sample_point)
 		box = self._createSmallRadiusBox(point,radius)
 		if is_sample_point is True:
- 			label=(point,True)
 			# Prevents adding sample points outside of the bounds of the 
 			# problem
 			if _checkRectangles(self.problem_bounds,_doublePoint(point)) == False: 
@@ -351,18 +320,12 @@ class Search_Space(object):
 			# Prevents adding wholly unnecessary sample points
 			if skip_on_covered is True:
 				intersecting_objects = list(self.tree.intersection(box,objects=True))
-				intersecting_boxes = [item for item in intersecting_objects if item.object[1] is True]
+				intersecting_boxes = [item for item in intersecting_objects if item.object.is_sample_point is True]
 				if len(intersecting_boxes) != 0: 
 					intersecting_boxes = [deinterleave(item.bbox) for item in intersecting_boxes]
 					box_sizes = [_findDistance(box,bbox) for bbox in intersecting_boxes]
 					max_box_size = np.amin(box_sizes)
 					if max_box_size <= 2.0*self.skip_radius_percentage*self.epsilon and self.skip_radius_percentage > 0.0: 
-						# print "\n"
-						# print "Refusing to add sample point ", point, " with radius ", radius
-						# print "Radius percentage threshold is ", 2.0*self.skip_radius_percentage*self.epsilon
-						# print "The skip_radius_percentage is ", self.skip_radius_percentage
-						# print "The max distance to the center of a box is ", max_box_size
-						# print "\n"
 						self._skipControl(True)
 						return 
 					if self.checkCover([box]) == True: 
@@ -388,43 +351,27 @@ class Search_Space(object):
 		if len(intersecting_balls)==0: 
 			return False
 		
-		intersecting_balls = [(deinterleave(item.bbox),item.object) for item in intersecting_balls]		
+		intersecting_balls = [item.object for item in intersecting_balls]		
+		intersecting_boxes = [self._createSmallRadiusBox(ball.point,ball.radius) for ball in intersecting_balls]
+
 		for ball in intersecting_balls: 
-			if self._checkRectangleAgainstBall(bounds,ball) is True:
+			if _checkRectangleAgainstBall(bounds,ball) is True:
+				return True
+		# In some edge cases, numerical instability in calculating ball containment
+		# leads to incorrect results. The following check is less permissive
+		# in general but more stable in those instances.
+		for box in intersecting_boxes: 
+			if _checkRectangles(box,bounds): 
 				return True
 
-		def replace_with_epsilon(ball): 
-			if ball[1][1] is True: 
-				return (ball[0],(ball[1][0],self.epsilon))
-			else: 
-				return ball
-		intersecting_balls = [replace_with_epsilon(ball) for ball in intersecting_balls]
-		intersecting_boxes = [self._createSmallRadiusBox(item[1][0],item[1][1]) for item in intersecting_balls]
-		for ball in intersecting_balls: 
-			if self._checkRectangleAgainstBall(bounds,ball) is True:
-				return True
-
-		volume_of_bounds = _findSizeOfIntersection(bounds,bounds)
 		intersection_sizes = [_findSizeOfIntersection(bounds,box) for box in intersecting_boxes]
-		for i in range(len(intersection_sizes)): 
-			if intersection_sizes[i] == volume_of_bounds: 
-				intersection_sizes[i] = 0.0
 		index = np.argmax(intersection_sizes)
 		if intersection_sizes[index] <= 0.0: 
-			# print "\n"
-			# print "Failed to find any small box intersections with ", bounds
-			# print "The intersecting small boxes are ", intersecting_boxes
-			# print "The skip percentage for hueristics is at: ", self.skip_radius_percentage
-			# print "Counter to see if any points are getting added: ", self.id_counter
-			# print "\n"
 			return False 
 		box_to_split_along = intersecting_boxes[index]
 		split_up_box = _splitAlongIntersectingBox(bounds,box_to_split_along)
 
 		if split_up_box is False: 
-			# print "\n"
-			# print "Failing to split up box ", bounds, "with split along ", box_to_split_along
-			# print "\n"
 			return False 
 
 		return [search_box(box) for box in split_up_box]
@@ -475,8 +422,8 @@ class Search_Space(object):
 		all_values = self.tree.intersection(absolute_bounds,objects=True)
 		output_values = [] 
 		for item in all_values: 
-			if item.object[1] is True: 
-				output_values += [item.object[0]]
+			if item.object.is_sample_point is True: 
+				output_values += [item.object.point]
 		return output_values
 
 	def outputSampleRectangles(self): 
@@ -485,7 +432,7 @@ class Search_Space(object):
 			absolute_bounds.append(-MAX_BOUNDS)
 			absolute_bounds.append(MAX_BOUNDS)
 		all_values = self.tree.intersection(absolute_bounds,objects=True)
-		all_values = [_matlabRectangleFormat(item.bbox) for item in all_values if item.object[1]==True]
+		all_values = [_matlabRectangleFormat(item.bbox) for item in all_values if item.object.is_sample_point==True]
 		return all_values
 
 	def outputMinPoints(self): 
@@ -494,7 +441,7 @@ class Search_Space(object):
 			absolute_bounds.append(-MAX_BOUNDS)
 			absolute_bounds.append(MAX_BOUNDS)
 		all_values = self.tree.intersection(absolute_bounds,objects=True)
-		all_values = [item.object for item in all_values if item.object[1]!=True]
+		all_values = [item.object.point for item in all_values if item.object.is_sample_point!=True]
 		return all_values
 
 	def outputMinPointsMatlab(self): 
@@ -503,5 +450,5 @@ class Search_Space(object):
 			absolute_bounds.append(-MAX_BOUNDS)
 			absolute_bounds.append(MAX_BOUNDS)
 		all_values = self.tree.intersection(absolute_bounds,objects=True)
-		all_values = [_matlabRectangleFormat(item.bbox) for item in all_values if item.object[1]!=True]
+		all_values = [_matlabRectangleFormat(item.bbox) for item in all_values if item.object.is_sample_point!=True]
 		return all_values
