@@ -139,8 +139,7 @@ def _splitAlongIntersectingBox(box_to_split,box_to_intersect):
 				finished_boxes += [box]
 			else:
 				broken_down_box = _splitBoxAlongDimension(box,intersection[dimension],dimension)
-				new_output_boxes += broken_down_box
-			if broken_down_box is False: 
+				new_output_boxes += broken_down_box 
 		output_boxes = new_output_boxes
 	return finished_boxes+output_boxes
 
