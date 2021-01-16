@@ -2,7 +2,7 @@ tdasampling
 -------------
 
 Copyright (C) 2019 `Parker
-Edwards <https://people.clas.ufl.edu/pedwards>`__
+Edwards <https://sites.nd.edu/parker-edwards/>`__
 
 External requirements
 ---------------------
