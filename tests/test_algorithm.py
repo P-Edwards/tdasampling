@@ -1,5 +1,6 @@
 from tdasampling import algorithm
 from tdasampling import sampling_setup
+from tdasampling import sampling
 import tempfile
 from os.path import join
 import os
@@ -15,12 +16,6 @@ def test_check_for_nonzero_entry():
     assert algorithm.check_for_nonzero_entry([1, 1, 1, 1, 1]) == True
 
 
-#	parser.add_option("--mpiexecutable",dest="mpi_executable_location",default="mpiexec",help="Use this option to specify a path to mpiexec if it is not in your PATH by default.")
-#	parser.add_option("--hosts",dest="hosts",help="Comma separated list of ssh host names to use for MPI functionality of Bertini.")
-#	parser.add_option("--bertini",dest="bertini_executable_location",default="bertini",help="Use this option to specify a path to bertini if it is not in your PATH by default.")
-#	parser.add_option("--processors",dest="number_of_bertini_processes",type=int,default=1,help="Number of processors to use for solving initial system using Bertini.")
-
-
 def test_sampling_setup():
     tempdir = tempfile.mkdtemp()
     parameters = {
@@ -34,7 +29,47 @@ def test_sampling_setup():
         polynomial_system.write("x1,y1\nx1^2 + y1^2 - 1\n")
 
     sampling_setup(parameters, args)
-    assert True == True
+    assert os.path.exists(join(tempdir, "minimizer/failed_paths"))
+    assert os.path.exists(join(tempdir, "minimizer/finite_solutions"))
+    assert os.path.exists(join(tempdir, "minimizer/input_param"))
+    assert os.path.exists(join(tempdir, "minimizer/input_start"))
+    assert os.path.exists(join(tempdir, "minimizer/main_data"))
 
+
+def test_sampling():
+    tempdir = tempfile.mkdtemp()
+    parameters = {
+        "mpi_executable_location": "mpiexec",
+        "hosts": None,
+        "bertini_executable_location": "bertini",
+        "number_of_bertini_processes": 1
+    }
+    args = [tempdir]
+    with open(join(tempdir, "polynomial_system"), "w") as polynomial_system:
+        polynomial_system.write("x1,y1\n(x1-1)^2 + (y1-1)^2 - 1\n")
+
+    sampling_setup(parameters, args)
+
+    parameters = {
+        "number_of_parallel_instances": 1,
+        "number_of_processors_for_bertini": 1,
+        "parameter_file": False,
+        "mpi_executable_location": None,
+        "bertini_executable_location": None,
+        "total_number_of_processors": None,
+        "rounding_precision": 1e-7,
+        "output_file_name": None,
+        "dimensionality": None,
+        "previous_points": None,
+        "old_density": None,
+        "hosts": None,
+        "skip_interval": None,
+        "rolling_average_length": None,
+        "number_of_allowed_skips": None,
+        "output_path": None,
+        "variable_indices": None
+    }
+    args = ["0,2,0,2", "0.1", "1", tempdir]
+    sampling(parameters, args)
 
 
