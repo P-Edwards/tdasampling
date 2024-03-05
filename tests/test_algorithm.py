@@ -69,7 +69,10 @@ def test_sampling():
         "output_path": None,
         "variable_indices": None
     }
-    args = ["0,2,0,2", "0.1", "1", tempdir]
+    args = ["0,2,0,2", "1", "1", tempdir]
     sampling(parameters, args)
+
+    print(os.listdir(tempdir))
+    assert os.path.exists(join(tempdir, "100e-2_sample.txt"))
 
 
