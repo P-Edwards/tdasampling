@@ -16,6 +16,7 @@ ss = Search_Space
 MAXIMUM_NUMBER_OF_POINTS_TO_ADD = 20
 
 
+
 def check_for_nonzero_entry(input_list): 
 	for entry in input_list:
 		if entry > 0: 
@@ -24,60 +25,46 @@ def check_for_nonzero_entry(input_list):
 
 
 
-
 def sampling_algorithm(global_template_location,number_of_functions,bounds,density_parameter,rounding_precision,points_queue,rectangles_queue,sample_rectangles_queue,computation_options=dict(),eval_template_location=False,smaller_box_info=False,variable_indices=[]):
 	# These files are required for the algorithm
-	if not os.path.exists(os.path.join(global_template_location,"input_param")): 
+	if not os.path.exists(join(global_template_location,"input_param")):
 		raise RuntimeError("No parameter homotopy file input_param found in directory " + global_template_location)
-	if not os.path.exists(os.path.join(global_template_location,"start_points")): 
+	if not os.path.exists(join(global_template_location,"start_points")):
 		raise RuntimeError("No starting solutions found for parameter homotopy in file start_points.")
-	if not os.path.exists(os.path.join(global_template_location,"start_parameters")): 
+	if not os.path.exists(join(global_template_location,"start_parameters")):
 		raise RuntimeError("No starting parameters found for parameter homotopy in minimizer directory.")
-	
-	if computation_options.has_key("mpi_executable_location"): 
-		mpi_executable_location = computation_options["mpi_executable_location"]
-	else: 
-		mpi_executable_location = "mpirun"
 
-	if computation_options.has_key("bertini_executable_location"): 
-		bertini_executable_location = computation_options["bertini_executable_location"]
-	else: 
-		bertini_executable_location = "bertini"
-
-	if computation_options.has_key("number_of_processors_for_bertini"): 
-		number_of_processors_for_bertini = computation_options["number_of_processors_for_bertini"]
-	else: 
-		number_of_processors_for_bertini = multiprocessing.cpu_count()/2
-
-	if computation_options.has_key("hosts"): 
+	mpi_executable_location = computation_options.get("mpi_executable_location", "mpirun")
+	bertini_executable_location = computation_options.get("bertini_executable_location", "bertini")
+	number_of_processors_for_bertini = computation_options.get("number_of_processors_for_bertini", multiprocessing.cpu_count()/2)
+	hosts = computation_options.get("hosts", None)
+	if hosts is not None: 
 		distributed_run_flag = True
-		hosts = computation_options["hosts"]
 	else: 
 		distributed_run_flag = False
-
-	if computation_options.has_key("skip_interval") or computation_options.has_key("rolling_average_length") or computation_options.has_key("number_of_allowed_skips"): 
+	
+	if "skip_interval" in computation_options or "rolling_average_length" in computation_options or "number_of_allowed_skips" in computation_options:
 		heuristics_options = dict()
-		if computation_options.has_key("skip_interval"): 
+		if "skip_interval" in computation_options:
 			heuristics_options["skip_interval"] = computation_options["skip_interval"]
-		if computation_options.has_key("rolling_average_length"): 
+		if "rolling_average_length" in computation_options:
 			heuristics_options["rolling_average_length"] = computation_options["rolling_average_length"]
-		if computation_options.has_key("number_of_allowed_skips"): 
+		if "number_of_allowed_skips" in computation_options:
 			heuristics_options["number_of_allowed_skips"] = computation_options["number_of_allowed_skips"]
-	else: 
+	else:
 		heuristics_options = None
 
-	if smaller_box_info: 	
+	if smaller_box_info:
 		space = ss(density_parameter,rounding_precision,bounds,smaller_box_info["data"],smaller_box_info["density"],heuristics_options)
 	else: 
 		space = ss(density_parameter,rounding_precision,bounds,heuristics_options=heuristics_options)
 	dimensionality = space.dimension
 	
-
 	if distributed_run_flag: 
 		run_path = os.path.join(global_template_location,"computation_directory")
 		directory_counter = 0 
-		while os.path.exists(run_path+str(directory_counter)): 
-			directory_counter += 1 
+		while os.path.exists(run_path+str(directory_counter)):
+			directory_counter += 1
 		run_path = run_path + str(directory_counter)
 		def minimizer(point_to_test): 
 			return bertiniMinimizer(run_path,point_to_test,number_of_processors_for_bertini,number_of_functions,dimensionality,bertini_executable_location,mpi_executable_location,bounds,hosts,variable_indices)
@@ -170,5 +157,8 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 	sample_rectangles_queue.put(sample_rectangles)
 	min_rectangles = space.outputMinPointsMatlab()
 	rectangles_queue.put(min_rectangles)
+
+
+
 
 
