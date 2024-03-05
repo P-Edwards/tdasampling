@@ -22,13 +22,13 @@ def _doublePoint(point):
 
 def _middleOfBox(box):
 	return_point = list()
-	for i in xrange(0,len(box),2):
+	for i in range(0,len(box),2):
 		midpoint = (box[i]+box[i+1])/2.0
 		return_point.append(midpoint)
 	return return_point
 
 def _checkRectangles(bounding_rectangle,rectangle_to_check): 
-	for coordinate in xrange(0,len(bounding_rectangle),2) :
+	for coordinate in range(0,len(bounding_rectangle),2) :
 		check_low = rectangle_to_check[coordinate]
 		check_high = rectangle_to_check[coordinate+1]
 		bound_low = bounding_rectangle[coordinate]
@@ -50,12 +50,12 @@ def _constructHypercube(dimension):
 
 
 def deinterleave(interleaved):
-    dimension = len(interleaved) // 2
-    def gen(): 
-    	for i in xrange(dimension): 
-    		yield interleaved[i]
-    		yield interleaved[i+dimension]
-    return list(gen())
+	dimension = len(interleaved) // 2
+	def gen(): 
+		for i in range(dimension):
+			yield interleaved[i]
+			yield interleaved[i+dimension]
+	return list(gen())
 
 def _matlabRectangleFormat(box): 
 	box = deinterleave(box)
@@ -73,7 +73,7 @@ def _splitBox(bounds,list_of_grid_points=False):
 	dimension = len(list_of_grid_points)
 	if dimension == 1: 
 		points = list_of_grid_points[0]
-		return [[points[i],points[i+1]] for i in xrange(len(points)-1)]
+		return [[points[i],points[i+1]] for i in range(len(points)-1)]
 	else: 
 		output = list()
 		first_dim_boxes = _splitBox(bounds,[list_of_grid_points[0]])
@@ -106,7 +106,7 @@ def _splitBoxAlongDimension(box_to_split,input_split_points,dimension):
 		if split_points[-1] != box_to_split[2*dimension+1]: 
 			split_points += [box_to_split[2*dimension+1]]
 
-	new_ranges_in_given_dimension = [[split_points[i],split_points[i+1]] for i in xrange(len(split_points)-1)]
+	new_ranges_in_given_dimension = [[split_points[i],split_points[i+1]] for i in range(len(split_points)-1)]
 	for value_range in new_ranges_in_given_dimension: 
 		if value_range[0] >= value_range[1]: 
 			return False
@@ -122,7 +122,7 @@ def _splitAlongIntersectingBox(box_to_split,box_to_intersect):
 	if _checkRectangles(box_to_intersect,box_to_split): 
 		return False
 	intersection = list() 
-	for coordinate in xrange(0,len(box_to_split),2): 
+	for coordinate in range(0,len(box_to_split),2): 
 		coordinates_to_add = [max(box_to_split[coordinate],box_to_intersect[coordinate]),min(box_to_split[coordinate+1],box_to_intersect[coordinate+1])]
 		if coordinates_to_add[0] == coordinates_to_add[1]: 
 			return box_to_split
@@ -132,7 +132,7 @@ def _splitAlongIntersectingBox(box_to_split,box_to_intersect):
 
 	output_boxes = [box_to_split]
 	finished_boxes = list()
-	for dimension in xrange(0,len(intersection)): 
+	for dimension in range(0,len(intersection)): 
 		new_output_boxes = list()
 		for box in output_boxes: 
 			if _findSizeOfIntersection(box,box_to_intersect) == 0.0: 
@@ -145,7 +145,7 @@ def _splitAlongIntersectingBox(box_to_split,box_to_intersect):
 
 def _findIntersectionPoints(first_box,second_box): 
 	intersection = list() 
-	for coordinate in xrange(0,len(first_box),2): 
+	for coordinate in range(0,len(first_box),2): 
 		coordinates_to_add = [max(first_box[coordinate],second_box[coordinate]),min(first_box[coordinate+1],second_box[coordinate+1])]
 		if coordinates_to_add[0] == coordinates_to_add[1]: 
 			return False
@@ -156,7 +156,7 @@ def _findIntersectionPoints(first_box,second_box):
 
 def _findSizeOfIntersection(first_box,second_box): 
 	intersection = list() 
-	for coordinate in xrange(0,len(first_box),2): 
+	for coordinate in range(0,len(first_box),2): 
 		if first_box[coordinate+1] < second_box[coordinate] or first_box[coordinate] > second_box[coordinate+1]: 
 			return 0.0
 
@@ -171,11 +171,11 @@ def _findDistance(first_box,second_box):
 	return np.linalg.norm(point_one - point_two)
 
 def _maxLengthOfBox(box): 
-	box_lengths = np.array([(box[i+1]-box[i]) for i in xrange(0,len(box),2)])
+	box_lengths = np.array([(box[i+1]-box[i]) for i in range(0,len(box),2)])
 	return np.prod(box_lengths)
 
 def _maxSideLengthOfBox(box): 
-	box_lengths = np.array([(box[i+1]-box[i]) for i in xrange(0,len(box),2)])
+	box_lengths = np.array([(box[i+1]-box[i]) for i in range(0,len(box),2)])
 	# This is a dengerate case we need to check
 	if np.amin(box_lengths) <= 0: 
 		return 0.0
@@ -191,7 +191,7 @@ def _createLargeRadiusBox(point,radius):
 
 def _checkRectangleAgainstBall(bounding_rectangle,ball): 
 	center_point_of_ball =  ball.point
-	total_dimension = len(bounding_rectangle)/2
+	total_dimension = len(bounding_rectangle)//2
 	corners_of_rectangle = [[bounding_rectangle[2*dimension + hypercube_corner[dimension]] for dimension in range(total_dimension)] for hypercube_corner in _constructHypercube(total_dimension)]
 
 	corners_of_rectangle = [np.array(corner) for corner in corners_of_rectangle]
@@ -227,7 +227,7 @@ class Search_Space(object):
 		self.epsilon = density_parameter
 		self.delta = precision_parameter
 		p = index.Property()
-		dimension = len(global_bounds)/2
+		dimension = len(global_bounds)//2
 		self.dimension = dimension
 		p.dimension = dimension
 		self.tree = index.Index(properties=p)
@@ -241,7 +241,7 @@ class Search_Space(object):
 			self.problem_bounds.append(self.global_bounds[i]-0.0*self.epsilon/2.0)
 			self.problem_bounds.append(self.global_bounds[i+1]+0.0*self.epsilon/2.0)
 
-		self.max_length_limit = _maxSideLengthOfBox(self._createSmallRadiusBox([0.0 for i in xrange(0,dimension)],self.epsilon-self.delta))
+		self.max_length_limit = _maxSideLengthOfBox(self._createSmallRadiusBox([0.0 for i in range(0,dimension)],self.epsilon-self.delta))
 		self.current_max_length = _maxLengthOfBox(global_bounds)
 		self.old_box = list([])
 		self.skip_list = list()
@@ -270,8 +270,8 @@ class Search_Space(object):
 
 		if points is not None: 
 			self.bad_boxes = [search_box(self._createSmallRadiusBox(point,old_distance)) for point in points]
-			print "Length of bad boxes: ", len(self.bad_boxes)
-			print "Old distance: ", old_distance
+			print("Length of bad boxes: ", len(self.bad_boxes))
+			print("Old distance: ", old_distance)
 
 			for point in points: 
 				self.addPoint(point,is_sample_point=True,skip_on_covered=False)
@@ -415,7 +415,7 @@ class Search_Space(object):
 
 	def outputSamplePoints(self): 
 		absolute_bounds = list()
-		for i in xrange(0,self.dimension): 
+		for i in range(0,self.dimension): 
 			absolute_bounds.append(-MAX_BOUNDS)
 			absolute_bounds.append(MAX_BOUNDS)
 		all_values = self.tree.intersection(absolute_bounds,objects=True)
@@ -427,7 +427,7 @@ class Search_Space(object):
 
 	def outputSampleRectangles(self): 
 		absolute_bounds = list()
-		for i in xrange(0,self.dimension): 
+		for i in range(0,self.dimension): 
 			absolute_bounds.append(-MAX_BOUNDS)
 			absolute_bounds.append(MAX_BOUNDS)
 		all_values = self.tree.intersection(absolute_bounds,objects=True)
@@ -436,7 +436,7 @@ class Search_Space(object):
 
 	def outputMinPoints(self): 
 		absolute_bounds = list()
-		for i in xrange(0,self.dimension): 
+		for i in range(0,self.dimension): 
 			absolute_bounds.append(-MAX_BOUNDS)
 			absolute_bounds.append(MAX_BOUNDS)
 		all_values = self.tree.intersection(absolute_bounds,objects=True)
@@ -445,7 +445,7 @@ class Search_Space(object):
 
 	def outputMinPointsMatlab(self): 
 		absolute_bounds = list()
-		for i in xrange(0,self.dimension): 
+		for i in range(0,self.dimension): 
 			absolute_bounds.append(-MAX_BOUNDS)
 			absolute_bounds.append(MAX_BOUNDS)
 		all_values = self.tree.intersection(absolute_bounds,objects=True)

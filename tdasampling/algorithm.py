@@ -1,6 +1,6 @@
 import numpy as np
-from search_space import Search_Space,_splitBoxAlongDimension
-from walking import bertiniMinimizer,bertiniEval
+from tdasampling.search_space import Search_Space,_splitBoxAlongDimension
+from tdasampling.walking import bertiniMinimizer,bertiniEval
 import multiprocessing
 import os,sys
 import resource
@@ -128,7 +128,7 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 		# Filtering for semialgebraic runs
 		if eval_template_location != False: 
 			evaluated_points = bertiniEval(eval_path,points,number_of_min_processes,number_of_eval_functions,dimensionality,bertini_executable_location,mpi_executable_location)
-			filtered_points = [points[index] for index in xrange(len(points)) if check_for_nonzero_entry(evaluated_points[index])]
+			filtered_points = [points[index] for index in range(len(points)) if check_for_nonzero_entry(evaluated_points[index])]
 			points = filtered_points
 
 		for point in points: 
@@ -143,7 +143,7 @@ def sampling_algorithm(global_template_location,number_of_functions,bounds,densi
 
 		counter += 1
 		if counter % 100 == 0: 
-			print "\n The algorithm instance checking bounds: ", space.global_bounds,"has boxes remaining: ", len(space.bad_boxes), "\n"
+			print("\n The algorithm instance checking bounds: ", space.global_bounds,"has boxes remaining: ", len(space.bad_boxes), "\n")
 
 
 

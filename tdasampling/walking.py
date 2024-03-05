@@ -86,7 +86,7 @@ def bertiniMinimizer(run_path,input_point,number_of_bertini_processes,number_of_
 				output_string += str(parameter[0]) + " " + str(parameter[1]) + "\n"
 			else: 
 				output_string += str(parameter) + " " + "0\n"
-		for dummy_variable in xrange(number_of_functions):
+		for dummy_variable in range(number_of_functions):
 			output_string += "0 0\n"
 		return output_string
 
@@ -110,7 +110,7 @@ def bertiniMinimizer(run_path,input_point,number_of_bertini_processes,number_of_
 
 	solution_points = readSolutionsFile(solutions_file_path,dimensionality,variable_indices)
 	if len(solution_points) == 0: 
-		print "Failed to find solution points for input point: ",input_point
+		print("Failed to find solution points for input point: ",input_point)
 		return {"points": False, "distance": 0.0}
 	solution_distances = np.array([norm(input_point-critical_point) for critical_point in solution_points])
 	min_index = np.argmin(solution_distances)
@@ -127,7 +127,7 @@ def bertiniMinimizerHRC(run_path,input_point,number_of_bertini_processes,number_
 				output_string += str(parameter[0]) + " " + str(parameter[1]) + "\n"
 			else: 
 				output_string += str(parameter) + " " + "0\n"
-		for dummy_variable in xrange(number_of_functions):
+		for dummy_variable in range(number_of_functions):
 			output_string += "0 0\n"
 		return output_string
 
@@ -146,7 +146,7 @@ def bertiniMinimizerHRC(run_path,input_point,number_of_bertini_processes,number_
 
 	solution_points = readSolutionsFile(solutions_file_path,dimensionality,variable_indices)
 	if len(solution_points) == 0: 
-		print "Failed to find solution points for input point: ",input_point
+		print("Failed to find solution points for input point: ",input_point)
 		return {"points": False, "distance": 0.0}
 	solution_distances = np.array([norm(input_point-critical_point) for critical_point in solution_points])
 	min_index = np.argmin(solution_distances)

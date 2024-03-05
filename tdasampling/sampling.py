@@ -65,7 +65,7 @@ def sampling(parameters, args):
 		previous_run_data = False
 	else:
 		if parameters["old_density"] is not None: 
-			print "No previous density provided. Running without previous sample data."
+			print("No previous density provided. Running without previous sample data.")
 			previous_run_data = False
 		else: 
 			previous_run_data = dict()
@@ -119,13 +119,13 @@ def sampling(parameters, args):
 	
 		
 	if parameters["total_number_of_processors"] is None: 
-		total_processors = multiprocessing.cpu_count()/2
+		total_processors = multiprocessing.cpu_count()//2
 	else: 
 		total_processors = parameters["total_number_of_processors"]
 	p = multiprocessing.Pool(total_processors)
 	# The map_async and get timeout is a bug workaround for getting ctrl+C to work correctly. 
 	# See https://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool
-	process_pool = p.map_async(wrap_sampling_algorithm,process_argument_list).get(9e10)
+	process_pool = p.map_async(wrap_sampling_algorithm,process_argument_list).get(9e8)
 	# process_pool.wait()
 	
 	# Extract sampled points from individual algorithm instances
