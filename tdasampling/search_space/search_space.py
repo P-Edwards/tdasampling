@@ -13,14 +13,14 @@ def sum_list(input_list):
 		return 0.0
 	return np.sum(input_list)
 
-def _doublePoint(point): 
+def _doublePoint(point):
 	doubled_point = list()
-	for coordinate in point: 
+	for coordinate in point:
 		doubled_point += [coordinate]
 		doubled_point += [coordinate]
 	return tuple(doubled_point)
 
-def _middleOfBox(box): 
+def _middleOfBox(box):
 	return_point = list()
 	for i in xrange(0,len(box),2):
 		midpoint = (box[i]+box[i+1])/2.0
@@ -451,3 +451,4 @@ class Search_Space(object):
 		all_values = self.tree.intersection(absolute_bounds,objects=True)
 		all_values = [_matlabRectangleFormat(item.bbox) for item in all_values if item.object.is_sample_point!=True]
 		return all_values
+

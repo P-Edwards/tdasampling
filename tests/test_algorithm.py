@@ -46,7 +46,7 @@ def test_sampling():
     }
     args = [tempdir]
     with open(join(tempdir, "polynomial_system"), "w") as polynomial_system:
-        polynomial_system.write("x1,y1\n(x1-1)^2 + (y1-1)^2 - 1\n")
+        polynomial_system.write("x,y\nx^2 + y^2 - 1")
 
     sampling_setup(parameters, args)
 
@@ -69,10 +69,17 @@ def test_sampling():
         "output_path": None,
         "variable_indices": None
     }
-    args = ["0,2,0,2", "1", "1", tempdir]
+    args = ["-1.0,1.0,-1.0,1.0", "5e-1", "1", tempdir]
     sampling(parameters, args)
 
-    print(os.listdir(tempdir))
-    assert os.path.exists(join(tempdir, "100e-2_sample.txt"))
+    with open(join(tempdir, "50e-2_sample.txt"), "r") as sample_file:
+        samples = sample_file.readlines()
+
+    assert os.path.exists(join(tempdir, "50e-2_sample.txt"))
+    assert len(samples) > 0
+    for sample in samples:
+        x, y = sample.split(",")
+        assert abs(float(x)**2 + float(y)**2 - 1) < 1e-7
+
 
 
