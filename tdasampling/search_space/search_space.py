@@ -220,10 +220,11 @@ class indexed_box_label(object):
 		self.radius = radius
 		self.is_sample_point = is_sample_point
 
+
 class Search_Space(object): 
 
-
-	def __init__(self,density_parameter,precision_parameter,global_bounds,points=None,old_distance=None,heuristics_options=None): 
+	def __init__(self,density_parameter,precision_parameter,global_bounds,points=None,old_distance=None,heuristics_options=None):
+		
 		self.epsilon = density_parameter
 		self.delta = precision_parameter
 		p = index.Property()
@@ -250,23 +251,19 @@ class Search_Space(object):
 		self.sample_count = 0
 		self.modulous_counter = 0
 
-		if heuristics_options is not None: 
-			if heuristics_options.has_key("skip_interval"): 
-				self.skip_interval = heuristics_options["skip_interval"]
-			else: 
-				self.skip_interval = 5.0*pow(10.0,-self.dimension)
-			if heuristics_options.has_key("number_of_allowed_skips"): 
-				self.number_of_allowed_skips = heuristics_options["number_of_allowed_skips"]
-			else: 
-				self.number_of_allowed_skips = 49 
-			if heuristics_options.has_key("rolling_average_length"): 
-				self.rolling_average_length = heuristics_options["rolling_average_length"]
-			else: 
-				self.rolling_average_length = self.number_of_allowed_skips+1
-		else: 
-			self.skip_interval = 5.0*pow(10.0,-self.dimension)
-			self.number_of_allowed_skips = 49
-			self.rolling_average_length = 50 
+		if heuristics_options is None:
+			heuristics_options = {}
+		self.skip_interval = heuristics_options.get(
+			"skip_interval",
+			5.0*pow(10.0, -self.dimension)
+		)
+		self.number_of_allowed_skips = heuristics_options.get(
+			"number_of_allowed_skips", 49
+		)
+		self.rolling_average_length = heuristics_options.get(
+			"rolling_average_length",
+			self.number_of_allowed_skips+1
+		)
 
 		if points is not None: 
 			self.bad_boxes = [search_box(self._createSmallRadiusBox(point,old_distance)) for point in points]
