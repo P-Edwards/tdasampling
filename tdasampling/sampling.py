@@ -53,7 +53,7 @@ def sampling(parameters, args):
 		raise RuntimeError("The number of functions in the polynomial system must be specified.")
 	overall_bounds = parameters["bounds"]
 	overall_bounds = [float(entry) for entry in overall_bounds]
-	dimensionality = len(overall_bounds)/2
+	dimensionality = len(overall_bounds)//2
 	density_parameter = float(parameters["density_parameter"])
 	number_of_functions = parameters["number_of_functions"]
 	if parameters["variable_indices"] is not None:

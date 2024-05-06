@@ -3,3 +3,6 @@ This package makes calls to Bertini (https://bertini.nd.edu), and is a covered w
 Bertini(TM) version 1.5
 Authors: D.J. Bates, J.D. Hauenstein, A.J. Sommese, C.W. Wampler
 Copyright (C) 2015
+
+
+Updates to bring the package to version 2.0.0, compatible with Python 3, were made in 2024 by Jarno Rantaharju with the Aalto Research Software Engineering service at Aalto University. https://scicomp.aalto.fi/rse/
