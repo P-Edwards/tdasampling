@@ -13,6 +13,7 @@ External requirements
    `Rtree <https://pypi.python.org/pypi/Rtree/>`__)
 3. An mpiexec executable, like the one you can compile from source
    `here <https://www.open-mpi.org/software/ompi/v3.0/>`__
+4. The `timeout` shell command. Default in Linux installs.
 
 Description
 -----------
@@ -29,6 +30,17 @@ The package installs two command line scripts:
 
 See the included tutorial for detailed information about all the
 different options.
+
+Installation
+------------
+There is now a `conda` version available for Linux via Anaconda. You can install it with
+.. code:: shell 
+
+   $ conda install parkeredw::tdasampling 
+
+This should install the external requirements `bertini` and `rtree` along with the shell
+scripts into your `conda` environment. If you would like to run `bertini` in parallel, your own 
+install or version of MPI is required.
 
 Version 2.0.0
 -------------
