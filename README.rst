@@ -34,6 +34,7 @@ different options.
 Installation
 ------------
 There is now a `conda` version available for Linux via Anaconda. You can install it with
+
 .. code:: shell 
 
    $ conda install parkeredw::tdasampling 
